@@ -34,9 +34,11 @@ class CatSerializer(serializers.ModelSerializer):
                   'age')
         read_only_fields = ('owner',)
 
+    # получение значения кастомного поля age
     def get_age(self, obj):
         return dt.datetime.now().year - obj.birth_year
 
+    # изменённый метод создания для сохранения achievements
     def create(self, validated_data):
         if 'achievements' not in self.initial_data:
             cat = Cat.objects.create(**validated_data)
@@ -50,3 +52,17 @@ class CatSerializer(serializers.ModelSerializer):
                 AchievementCat.objects.create(
                     achievement=current_achievement, cat=cat)
             return cat
+
+    # валидатор поля birth_date
+    def validate_birth_year(self, value):
+        year = dt.date.today().year
+        if not (year - 40 < value <= year):
+            raise serializers.ValidationError('Проверьте год рождения!')
+        return value
+
+    # общий валидатор для всех полей
+    def validate(self, data):
+        if data['color'] == data['name']:
+            raise serializers.ValidationError(
+                'Имя не может совпадать с цветом!')
+        return data
