@@ -9,6 +9,10 @@ class CatViewSet(viewsets.ModelViewSet):
     queryset = Cat.objects.all()
     serializer_class = CatSerializer
 
+    # переопределяем метод, который сохраняет новые записи
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
